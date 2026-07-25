@@ -15,11 +15,11 @@ module comp(
             cnt <= 0;
         end
         else begin
-            read_addr = cnt;
             out <= read_data;
             cnt = cnt + 1;
         end
     end
+    assign read_addr = cnt;
 endmodule
 
 module mem(
@@ -42,10 +42,11 @@ module mem(
         if (startup_wen) begin
             mem[startup_write_addr] <= startup_write_data;
         end
-        else begin
-            read_data <= mem[read_addr];
-        end
+        //else begin
+        //    read_data <= mem[read_addr];
+        //end
     end
+    assign read_data = mem[read_addr];
 endmodule
 
 module test_comp();
