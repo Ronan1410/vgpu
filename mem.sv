@@ -2,7 +2,7 @@ module mem(
     input rst, clk,
     input [15:0] read_addr,
     input [15:0] write_addr,
-    output [7:0] write_data,
+    output [7:0] read_data,
     input [7:0] write_data
 );
 
