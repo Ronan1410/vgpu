@@ -1,4 +1,43 @@
-to compile verilog: iverilog -g2012 -o simulation.vvp comp.sv comp_driver.sv
+# toy_proc
+Play with building a toy processor from scratch, in verilog
 
+# To run / simulate
 
-to run: vvp simulation.vvp
+## prerequisites
+
+- python 3
+- iverilog (e.g. `brew install iverilog`, or see https://github.com/steveicarus/iverilog )
+
+## procedure
+
+```
+python run.py --name [progname, e.g. prog5]
+```
+
+# To compile with verilator
+
+(there is no runner for verilator currently, but the modules do compile)
+
+## prerequisites
+
+- verilator (e.g. `brew install verilator`)
+
+## procedure
+
+```
+verilator -sv --cc src/proc.sv src/mem.sv src/comp.sv -Isrc
+```
+
+# To determine maximum clockspeed / timing
+
+[This section in progress]
+
+## prequisites
+
+- yosys (e.g. `brew install yosys`, or see http://bygone.clairexen.net/yosys/ )
+- opensroad/sta (build from source, see https://github.com/The-OpenROAD-Project/OpenSTA )
+
+```
+yosys -s src/yosys.tacl
+# some sta command here that I haven't figure out yet :)
+```
