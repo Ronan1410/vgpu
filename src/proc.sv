@@ -8,6 +8,7 @@ module proc(
     output [7:0] x1,
     output reg [15:0] pc,
     output reg [4:0] state,
+    output reg outen,
 
     output reg mem_we,
     output reg [15:0] mem_read_addr,
@@ -37,6 +38,7 @@ module proc(
         else begin
             out <= '0;
             mem_we <= 0;
+            outen <= 0;
             case (state)
                 RESET: begin
                     mem_read_addr <= pc;
@@ -55,10 +57,12 @@ module proc(
                     case (op)
                         4'h1: begin
                             out[7:0] <= p1;
+                            outen <= 1;
                         end
                         4'h2: begin
                             if (mem_read_addr == p1 >> 1) begin
                                 out <= mem_read_data;
+                                outen <= 1;
                             end
                             else begin
                                 mem_read_addr <= p1 >> 1;
@@ -70,6 +74,7 @@ module proc(
                         end
                         4'h4: begin
                             out[7:0] <= regs[reg_select];
+                            outen <= 1;
                         end
                         default: out <= '0;
                     endcase
