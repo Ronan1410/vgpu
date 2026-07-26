@@ -58,29 +58,38 @@ module proc(
                         4'h1: begin
                             out[7:0] <= p1;
                             outen <= 1;
+                            pc <= pc + 1;
+                            mem_read_addr <= pc + 1;
+                            state <= AWAITING_INSTR;
                         end
                         4'h2: begin
                             if (mem_read_addr == p1 >> 1) begin
                                 out <= mem_read_data;
                                 outen <= 1;
+                                pc <= pc + 1;
+                                mem_read_addr <= pc + 1;
+                                state <= AWAITING_INSTR;
                             end
                             else begin
                                 mem_read_addr <= p1 >> 1;
-                                pc <= pc - 1;
+                                //pc <= pc - 1;
                             end
                         end
                         4'h3: begin
                             regs[reg_select] <= p1;
+                            pc <= pc + 1;
+                            mem_read_addr <= pc + 1;
+                            state <= AWAITING_INSTR;
                         end
                         4'h4: begin
                             out[7:0] <= regs[reg_select];
                             outen <= 1;
+                            pc <= pc + 1;
+                            mem_read_addr <= pc + 1;
+                            state <= AWAITING_INSTR;
                         end
                         default: out <= '0;
                     endcase
-                    pc <= pc + 1;
-                    mem_read_addr <= pc + 1;
-                    state <= AWAITING_INSTR;
                 end
             endcase
 

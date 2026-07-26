@@ -42,7 +42,7 @@ module comp_driver(
         end
     end
     initial begin
-        $readmemh("build/prog6.hex", mem_load);
+        $readmemh("build/prog3.hex", mem_load);
         for(int i = 0; i < 255; i++) begin
             #10
             oob_mem_wen = 1;
