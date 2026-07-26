@@ -1,4 +1,5 @@
-module comp_driver();
+module comp_driver(
+);
     reg rst;
     reg clk;
 
@@ -8,23 +9,21 @@ module comp_driver();
     wire [3:0] reg_select;
     wire [7:0] p1;
     wire [7:0] x1;
+    wire [4:0] state;
 
-    reg [15:0] mem_read_addr, mem_write_addr;
-    reg [15:0] mem_read_data, mem_write_data;
     reg [15:0] oob_write_addr;
     reg [15:0] oob_write_data;
-    wire mem_we;
     reg oob_mem_wen;
-
     reg [15:0] mem_load [256];
 
     comp comp1(
         .clk(clk), .rst(rst),
-        .pc(pc),
+        .pc(pc), .op(op), .reg_select(reg_select),
+        .x1(x1), .p1(p1), .state(state),
         .out(out),
         .oob_write_addr(oob_write_addr),
         .oob_write_data(oob_write_data),
-        .oob_write_wen(oob_mem_wen),
+        .oob_mem_wen(oob_mem_wen)
     );
 
     initial begin
@@ -44,11 +43,10 @@ module comp_driver();
         #10
 
         $monitor(
-            "t=%d rst=%b pc=%h out=%h p1=%h rs=%h x1=%h",
-            $time(), rst, pc, out, op, p1, reg_select, x1
-        );
+            "t=%d rst=%b pc=%h, out=%h op=%h p1=%h rs=%h x1=%h state=%d",
+            $time(), rst, pc, out,  op,   p1,   reg_select, x1, state);
         rst = 1;
         #10 rst = 0;
-        #200 $finish;
+        #400 $finish();
     end
 endmodule
