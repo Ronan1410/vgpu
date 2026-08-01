@@ -1,5 +1,4 @@
-module comp_driver(
-);
+module comp_driver();
     reg rst;
     reg clk;
 
@@ -19,6 +18,7 @@ module comp_driver(
 
     reg [7:0] outmem [32];
     reg [4:0] outpos;
+    reg halt;
 
     comp comp1(
         .clk(clk), .rst(rst),
@@ -27,7 +27,8 @@ module comp_driver(
         .out(out), .outen(outen),
         .oob_wr_addr(oob_wr_addr),
         .oob_wr_data(oob_wr_data),
-        .oob_wen(oob_wen)
+        .oob_wen(oob_wen),
+        .halt(halt)
     );
 
     initial begin
@@ -59,7 +60,10 @@ module comp_driver(
             $time(), rst, pc, out,  op,   p1,   reg_select, x1, state);
         rst = 1;
         #10 rst = 0;
-        #1000
+        while(~halt) begin
+            #10;
+        end
+        //#1000
         for(int i = 0; i < outpos; i++) begin
             $display("out[%d] = %h", i, outmem[i]);
         end
