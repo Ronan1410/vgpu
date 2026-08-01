@@ -42,6 +42,12 @@ module proc(
         OUTR = 4
     } e_op;
 
+    task read_next_instr([15:0] instr_addr);
+        mem_addr <= instr_addr;
+        mem_rd_req <= 1;
+        state <= AWAITING_INSTR;
+    endtask
+
     always @(posedge clk or posedge rst) begin
         if (rst) begin
             out <= '0;
@@ -69,9 +75,7 @@ module proc(
                                 out[7:0] <= c1_p1;
                                 outen <= 1;
                                 pc <= pc + 1;
-                                mem_addr <= pc + 1;
-                                mem_rd_req <= 1;
-                                state <= AWAITING_INSTR;
+                                read_next_instr(pc + 1);
                             end
                             OUTLOC: begin
                                 mem_addr <= {8'b0, 1'b0, c1_p1[7:1]};
@@ -83,18 +87,14 @@ module proc(
                                 regs[c1_reg_select] <= c1_p1;
                                 pc <= pc + 1;
                                 pc <= pc + 1;
-                                mem_addr <= pc + 1;
-                                mem_rd_req <= 1;
-                                state <= AWAITING_INSTR;
+                                read_next_instr(pc + 1);
                             end
                             OUTR: begin
                                 mem_wr_req <= 0;
                                 out[7:0] <= regs[c1_reg_select];
                                 outen <= 1;
                                 pc <= pc + 1;
-                                mem_addr <= pc + 1;
-                                mem_rd_req <= 1'b1;
-                                state <= AWAITING_INSTR;
+                                read_next_instr(pc + 1);
                             end
                             default: out <= '0;
                         endcase
@@ -113,9 +113,7 @@ module proc(
                                 out <= mem_rd_data;
                                 outen <= 1;
                                 pc <= pc + 1;
-                                mem_addr <= pc + 1;
-                                mem_rd_req <= 1;
-                                state <= AWAITING_INSTR;
+                                read_next_instr(pc + 1);
                             end
                         end
                     endcase
