@@ -35,6 +35,13 @@ module proc(
     wire [3:0] c1_reg_select;
     wire [7:0] c1_p1;
 
+    typedef enum bit[3:0] {
+        OUT = 1,
+        OUTLOC = 2,
+        LI = 3,
+        OUTR = 4
+    } e_op;
+
     always @(posedge clk or posedge rst) begin
         if (rst) begin
             out <= '0;
@@ -58,8 +65,7 @@ module proc(
                     mem_rd_req <= 1'b0;
                     if(mem_ack) begin
                         case (c1_op)
-                            4'h1: begin
-                                //out immediate value
+                            OUT: begin
                                 out[7:0] <= c1_p1;
                                 outen <= 1;
                                 pc <= pc + 1;
@@ -67,11 +73,12 @@ module proc(
                                 mem_rd_req <= 1'b1;
                                 state <= AWAITING_INSTR;
                             end
-                            4'h2: begin
+                            OUTLOC: begin
                                 mem_addr <= {8'b0, 1'b0, c1_p1[7:1]};
-                                    mem_rd_req <= 1'b1;
+                                mem_rd_req <= 1'b1;
+                                state <= GOT_INSTR;
                             end
-                            4'h3: begin
+                            LI: begin
                                 //li
                                 regs[c1_reg_select] <= c1_p1;
                                 pc <= pc + 1;
@@ -80,7 +87,7 @@ module proc(
                                 mem_rd_req <= 1'b1;
                                 state <= AWAITING_INSTR;
                             end
-                            4'h4: begin
+                            OUTR: begin
                                 //outr
                                 out[7:0] <= regs[c1_reg_select];
                                 outen <= 1;
@@ -100,7 +107,7 @@ module proc(
                 end
                 GOT_INSTR: begin
                     case (op)
-                        4'h2: begin
+                        OUTLOC: begin
                             //outloc
                             if (mem_addr == {8'b0, 1'b0, p1[7:1]}) begin
                                 out <= mem_rd_data;
