@@ -62,7 +62,7 @@ module proc(
                 end
                 AWAITING_INSTR: begin
                     // $display("AWAITINGINSTR ack=%d addr %d req %d busy", mem_ack, mem_addr, mem_rd_req, mem_busy);
-                    mem_rd_req <= 1'b0;
+                    mem_rd_req <= 0;
                     if(mem_ack) begin
                         case (c1_op)
                             OUT: begin
@@ -70,7 +70,7 @@ module proc(
                                 outen <= 1;
                                 pc <= pc + 1;
                                 mem_addr <= pc + 1;
-                                mem_rd_req <= 1'b1;
+                                mem_rd_req <= 1;
                                 state <= AWAITING_INSTR;
                             end
                             OUTLOC: begin
@@ -84,11 +84,11 @@ module proc(
                                 pc <= pc + 1;
                                 pc <= pc + 1;
                                 mem_addr <= pc + 1;
-                                mem_rd_req <= 1'b1;
+                                mem_rd_req <= 1;
                                 state <= AWAITING_INSTR;
                             end
                             OUTR: begin
-                                //outr
+                                mem_wr_req <= 0;
                                 out[7:0] <= regs[c1_reg_select];
                                 outen <= 1;
                                 pc <= pc + 1;
@@ -109,11 +109,12 @@ module proc(
                     case (op)
                         OUTLOC: begin
                             //outloc
-                            if (mem_addr == {8'b0, 1'b0, p1[7:1]}) begin
+                            if (mem_ack) begin
                                 out <= mem_rd_data;
                                 outen <= 1;
                                 pc <= pc + 1;
                                 mem_addr <= pc + 1;
+                                mem_rd_req <= 1;
                                 state <= AWAITING_INSTR;
                             end
                         end
