@@ -8,7 +8,7 @@ module mem_delayed_test();
     reg rd_req;
     reg rst;
 
-    mem_delayed2 mem_delayed2(
+    mem_delayed mem_delayed(
         .clk(clk), .busy(busy), .ack(ack), .rst(rst),
         .rd_req(rd_req), .wr_req(wr_req),
         rd_data(rd_data), .wr_data(wr_data), .addr(addr)

@@ -1,42 +1,76 @@
-//represents memory controller (plus memory that the memory is controlling)
-
-//forked from mem.sv, adds some delays, to simulate that memory
-// requests in reallity typically take a while
-
-module mem(
-    input we, clk,
-    input [15:0] rd_addr,
-    input [15:0] wr_addr,
-    output [15:0] rd_data,
+module mem_delayed(
+    input clk, rst, input wr_req, input rd_req,
+    out reg busy, output reg ack,
+    input [15:0] addr, output reg [15:0] rd_data,
     input [15:0] wr_data,
-    output reg rd_ready;
 
     input [15:0] oob_wr_addr,
     input [15:0] oob_wr_data,
     input oob_wen
 );
-    reg [15:0] mem [64];
+    
+    reg [15:0] mem[256];
+    reg [15:0] received_addr;
+    reg [15:0] received_data;
+    reg received_rd_req;
+    reg received_wr_req;
+    reg [4:0] clks_to_wait;
 
-    parameter delay_cycles = 5;
-    reg [15:0] rd_addr_delayed [delay_cycles];
-    reg [15:0] wr_addr_delayed [delay_cycles];
-
-    always @(posedge clk) begin
-        if (we) begin
-            mem[wr_addr_delayed[delay_cycles - 1]] <= wr_data;
+    always @(posedge clk or posedge rst) begin
+        if (rst) begin
+            reveived_rd_req <= 0;
+            received_wr_req <= 0;
+            busy <= 0;
         end
-        if(oob_wen) begin
+        else if(oob_wen) begin
             mem[oob_wr_addr] <= oob_wr_data;
         end
-        rd_addr_delayed[0] <= rd_addr;
-        wr_addr_delayed[0] <= wr_addr;
-        for(int i = 1; i < 5; i++) begin
-           read_addr_delayed[i] <= read_addr_delayed[i - 1];
-           write_addr_delayed[i] <= write_addr_delayed[i - 1];
+        else begin
+            if (received_rd_req) begin
+                if (clks_to_wait ==0) begin
+                    ack <= 1;
+                    rd_data <= mem[received_addr];
+                    received_rd_req <= 0;
+                    received_wr_req <= 0;
+                    busy <= 0;
+                end
+                else begin
+                    clks_to_wait <= clks_to_wait - 1;
+                end
+            end
+            else if (received_wr_req) begin
+                if (clks_to_wait ==0) begin
+                    ack <= 1;
+                    mem[received_addr] <= received_data;
+                    received_rd_req <= 0;
+                    received_wr_req <= 0;
+                    busy <= 0;
+                end
+                else begin
+                    clks_to_wait <= clks_to_wait - 1;
+                end
+            end
+            else if (wr_req) begin
+                received_wr_req <= 1;
+                clks_to_wait <= 4;
+                received_addr <= addr;
+                received_data <= wr_data;
+                ack <= 0;
+                busy <= 1;
+            end
+            else if (rd_req) begin
+                recevied_rd_req <= 1;
+                clks_to_wait <= 4;
+                received_addr <= addr;
+                ack <= 0;
+                busy <= 1;
+            end
+            else begin
+                ack <= 0;
+                busy <= 0;
+            end
         end
     end
-    // assign read_data = mem[read_addr];
-    assign read_data = mem[read_addr_delayed[delay_cycles - 1]];
 endmodule
 
 /*
